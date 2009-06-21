@@ -1,1 +1,3 @@
-# Include hook code here
+require "attribute_searchable"
+
+ActiveRecord::Base.send(:include, ActiveRecord::AttributeSearchable)
