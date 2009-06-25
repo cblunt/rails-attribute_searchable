@@ -95,13 +95,32 @@ module ActiveRecord
         combined_conditions = Caboose::EZ::Condition.new
 
         unless filters[:terms].nil? or self.terms_attributes.nil?
+
           filters[:terms].each do |term|
             term = ['%', term, '%'].join
 
             condition = Caboose::EZ::Condition.new
+
             self.terms_attributes.each do |column|
               condition.append ["#{column.to_s} LIKE ?", term], :or
             end
+
+            combined_conditions << condition
+          end
+
+          filters.delete(:terms)
+        end
+
+        # For every other filter key, attempt to filter as an attribute
+        filters.each do |attr, value|
+          logger.warn "Checking #{attr.to_s}"
+          if self.column_names.include?(attr.to_s)
+            logger.warn "Includes #{attr.to_s}"
+            condition = Caboose::EZ::Condition.new do
+              eval "#{attr.to_s} == value"
+            end
+
+            logger.warn "Condition: " + condition.to_sql.to_s
 
             combined_conditions << condition
           end
