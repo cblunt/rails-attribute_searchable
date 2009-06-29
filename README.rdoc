@@ -20,29 +20,27 @@ Once +ez_where+ is installed, install +attribute_searchable+ with:
 
 === Usage
 
-To make a model class +attribute_searchable+:
+To make a model class +attribute_searchable+
 
   class User < ActiveRecord::Base
     attribute_searchable
   end
  
-User will now have a +search+ method which wraps the normal +find+ method. You can use +search+ to wrap +find+, e.g:
++User+ will now have a +search+ method which wraps the normal +find+ method. You can use +search+ to wrap +find+, e.g:
 
-To find all records in the +users+ table:
   User.search(:all)
   => [...]
 
-As well as all the normal +find+ options, +search+ takes an optional +:filters+ hash, 
+As well as all the normal +find+ options, +search+ takes an optional +filters+ hash, 
 which is used to specify attribute filters, e.g:
 
-To find all users whose status is 5 and archived is true:
   # SQL: SELECT * FROM users WHERE (status = 5) AND (archived = TRUE)
   User.search(:all, :filters => { :status => 5, :archived => true })
 
-+attribute_searchable+ models can also be searched using +:terms+. +:terms+ is a special +:filter+ option which
++attribute_searchable+ models can also be searched using +terms+. +terms+ is a special +filter+ option which
 is used to build SQL ILIKE queries on your model's string-type attributes.
 
-You must first specify which attributes will be searched when filtering by +:terms+, e.g:
+You must first specify which attributes will be searched when filtering by +terms+, e.g:
 
 To search for users by +first_name+, +last_name+ or +email_address+:
 
@@ -52,12 +50,12 @@ To search for users by +first_name+, +last_name+ or +email_address+:
 
 You can now filter user's by search terms, e.g:
 
-To find users whose +:terms+ match +mary+:
   # SQL: SELECT * FROM users 
   # WHERE (first_name ILIKE '%mary%' OR last_name ILIKE '%mary%' OR email_address ILIKE '%mary%')
   User.search(:all, :filters => {:terms => %w{mary} })
 
 Where multiple terms are provided, they are joined using an AND clause:
+
   # SQL: SELECT * FROM users
   # WHERE (first_name ILIKE '%mary%' OR last_name ILIKE '%mary%' OR email_address ILIKE '%mary%')
   #   AND (first_name ILIKE '%company%' OR last_name ILIKE '%company%' OR email_address ILIKE '%company%')
