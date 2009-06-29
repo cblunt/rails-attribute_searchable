@@ -1,0 +1,71 @@
+== Attribute-searchable
+
+=== Introduction
+
++attribute_searchable+ is a small plugin that adds filtering +ActiveRecord+ to models. The plugin makes use of the
++ez_where+ plugin to allow complex attribute filters to be built up.
+
+To see my original blog posts that led to
++attribute_searchable+, please visit http://chrisblunt.com/blog/2009/05/12/rails-building-complex-search-filters-with-activerecord-and-ez_where/
+
+=== Installation
+
++attribute_searchable+ is dependent on the ez_where plugin:
+
+  ruby script/plugin install http://opensvn.csie.org/ezra/rails/plugins/dev/ez_where
+
+Once +ez_where+ is installed, install +attribute_searchable+ with:
+
+  ruby script/plugin install git://github.com/cblunt/rails-attribute_searchable.git
+
+=== Usage
+
+To make a model class +attribute_searchable+:
+
+  class User < ActiveRecord::Base
+    attribute_searchable
+  end
+ 
+User will now have a +search+ method which wraps the normal +find+ method. You can use +search+ to wrap +find+, e.g:
+
+To find all records in the +users+ table:
+  User.search(:all)
+  => [...]
+
+As well as all the normal +find+ options, +search+ takes an optional +:filters+ hash, 
+which is used to specify attribute filters, e.g:
+
+To find all users whose status is 5 and archived is true:
+  # SQL: SELECT * FROM users WHERE (status = 5) AND (archived = TRUE)
+  User.search(:all, :filters => { :status => 5, :archived => true })
+
++attribute_searchable+ models can also be searched using +:terms+. +:terms+ is a special +:filter+ option which
+is used to build SQL ILIKE queries on your model's string-type attributes.
+
+You must first specify which attributes will be searched when filtering by +:terms+, e.g:
+
+To search for users by +first_name+, +last_name+ or +email_address+:
+
+  class User < ActiveRecord::Base
+    attribute_searchable :terms_attributes => [:first_name, :last_name, :email_address]
+  end
+
+You can now filter user's by search terms, e.g:
+
+To find users whose +:terms+ match +mary+:
+  # SQL: SELECT * FROM users 
+  # WHERE (first_name ILIKE '%mary%' OR last_name ILIKE '%mary%' OR email_address ILIKE '%mary%')
+  User.search(:all, :filters => {:terms => %w{mary} })
+
+Where multiple terms are provided, they are joined using an AND clause:
+  # SQL: SELECT * FROM users
+  # WHERE (first_name ILIKE '%mary%' OR last_name ILIKE '%mary%' OR email_address ILIKE '%mary%')
+  #   AND (first_name ILIKE '%company%' OR last_name ILIKE '%company%' OR email_address ILIKE '%company%')
+  User.search(:all, :filters => {:terms => %w{mary company} })
+
+== Links/References
+
+* The +ez_where+ plugin: http://brainspl.at/articles/2006/06/30/new-release-of-ez_where-plugin
+* Original blog post: http://chrisblunt.com/blog/2009/05/12/rails-building-complex-search-filters-with-activerecord-and-ez_where/
+
+Copyright (c) 2009 Chris Blunt, released under the MIT license
